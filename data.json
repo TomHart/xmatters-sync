@@ -1,0 +1,80 @@
+{
+    "count": 77,
+    "total": 77,
+    "data": [
+        {
+            "group": {
+                "id": "e88e17ff-0bfc-44e5-8e93-e44e69c3a06e",
+                "targetName": "UK GDP Web Sports",
+                "recipientType": "GROUP",
+                "groupType": "ON_CALL",
+                "links": {
+                    "self": "/api/xm/1/groups/e88e17ff-0bfc-44e5-8e93-e44e69c3a06e"
+                }
+            },
+            "shift": {
+                "id": "7ccda993-7635-4f54-97be-767ca4ec3415",
+                "name": "2025 Jan - Mar",
+                "siteHolidays": {
+                    "onCall": true,
+                    "start": "2025-01-02T00:00:00.000Z",
+                    "end": "2025-01-03T00:00:00.000Z"
+                },
+                "links": {
+                    "self": "/api/xm/1/groups/e88e17ff-0bfc-44e5-8e93-e44e69c3a06e/shifts/7ccda993-7635-4f54-97be-767ca4ec3415"
+                }
+            },
+            "members": {
+                "count": 3,
+                "total": 12,
+                "data": [
+                    {
+                        "position": 1,
+                        "delay": 0,
+                        "escalationType": "NONE",
+                        "inRotation": true,
+                        "member": {
+                            "id": "94f8986c-fdbf-48e6-af00-95cd89523a77",
+                            "targetName": "thr15",
+                            "recipientType": "PERSON",
+                            "externallyOwned": false,
+                            "externalKey": "THR15",
+                            "links": {
+                                "self": "/api/xm/1/people/94f8986c-fdbf-48e6-af00-95cd89523a77"
+                            },
+                            "firstName": "Tom",
+                            "lastName": "Hart",
+                            "licenseType": "FULL_USER",
+                            "language": "en",
+                            "timezone": "Europe/London",
+                            "webLogin": "thomas.hart@sky.uk",
+                            "site": {
+                                "id": "804d2646-0f16-dc49-d00a-2bce6eae2fa0",
+                                "name": "Default Site",
+                                "links": {
+                                    "self": "/api/xm/1/sites/804d2646-0f16-dc49-d00a-2bce6eae2fa0"
+                                }
+                            },
+                            "lastLogin": "2024-12-12T17:17:06.610Z",
+                            "whenCreated": "2021-02-11T09:22:22.879Z",
+                            "whenUpdated": "2024-12-12T17:17:06.611Z",
+                            "status": "ACTIVE"
+                        }
+                    }
+                ],
+                "links": {
+                    "self": "/api/xm/1/groups/e88e17ff-0bfc-44e5-8e93-e44e69c3a06e/shifts/7ccda993-7635-4f54-97be-767ca4ec3415/occurrences/2025-01-14T07:00:00.000Z/members?offset=0&limit=3",
+                    "next": "/api/xm/1/groups/e88e17ff-0bfc-44e5-8e93-e44e69c3a06e/shifts/7ccda993-7635-4f54-97be-767ca4ec3415/occurrences/2025-01-14T07:00:00.000Z/members?offset=3&limit=3"
+                }
+            },
+            "notifyEndOfEscalation": {
+                "notifyEnabled": false
+            },
+            "start": "2025-01-14T07:00:00Z",
+            "end": "2025-01-15T07:00:00Z"
+        }
+    ],
+    "links": {
+        "self": "/api/xm/1/on-call?limit=100&groups=e88e17ff-0bfc-44e5-8e93-e44e69c3a06e&from=2025-01-14T07%3A57%3A10Z&to=2025-04-14T07%3A57%3A10Z&offset=0"
+    }
+}
