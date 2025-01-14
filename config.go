@@ -4,17 +4,43 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
+type Config struct {
+	ApiKey    string `toml:"API_KEY"`
+	ApiSecret string `toml:"API_SECRET"`
+	Username  string
+	Token     string
+}
+
 func GetAPIKey() (string, error) {
-	return ReadFromConfig("API_KEY")
+	config, err := ReadFromConfig()
+	if err != nil {
+		return "", err
+	}
+
+	if config.ApiKey == "" {
+		return "", errors.New("API_KEY not found in config file")
+	}
+
+	return config.ApiKey, nil
 }
 
 func GetAPISecret() (string, error) {
-	return ReadFromConfig("API_SECRET")
+	config, err := ReadFromConfig()
+	if err != nil {
+		return "", err
+	}
+
+	if config.ApiSecret == "" {
+		return "", errors.New("API_SECRET not found in config file")
+	}
+
+	return config.ApiSecret, nil
 }
 
 func WriteToConfig(key string, value string) error {
@@ -85,10 +111,10 @@ func WriteToConfig(key string, value string) error {
 	return nil
 }
 
-func ReadFromConfig(config string) (string, error) {
+func ReadFromConfig() (*Config, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("error getting home directory: %v", err)
+		return nil, fmt.Errorf("error getting home directory: %v", err)
 	}
 
 	configFilePath := homeDir + "/.gdp/xmatters.conf"
@@ -96,14 +122,14 @@ func ReadFromConfig(config string) (string, error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
-				return "", errors.Join(errors.New("error creating config directory"), err)
+				return nil, errors.Join(errors.New("error creating config directory"), err)
 			}
 			file, err = os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE, 0755)
 			if err != nil {
-				return "", errors.Join(errors.New("error creating config file"), err)
+				return nil, errors.Join(errors.New("error creating config file"), err)
 			}
 		} else {
-			return "", errors.Join(errors.New("error opening config file"), err)
+			return nil, errors.Join(errors.New("error opening config file"), err)
 		}
 	}
 
@@ -114,17 +140,16 @@ func ReadFromConfig(config string) (string, error) {
 		}
 	}(file)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, config+"=") {
-			return strings.TrimPrefix(line, config+"="), nil
-		}
+	tomlData, err := os.ReadFile(configFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading config file: %v", err)
 	}
 
-	if err := scanner.Err(); err != nil {
-		return "", errors.Join(err, errors.New("error reading config file"))
+	var conf Config
+	_, err = toml.Decode(string(tomlData), &conf)
+	if err != nil {
+		return nil, fmt.Errorf("error decoding config file: %v", err)
 	}
 
-	return "", fmt.Errorf("%s not found in config file", config)
+	return &conf, nil
 }

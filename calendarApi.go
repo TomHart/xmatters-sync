@@ -88,7 +88,7 @@ func getClient(config *oauth2.Config) *http.Client {
 			log.Fatalf("Error marshaling token: %v", err)
 		}
 
-		err = WriteToConfig("TOKEN", string(tokenBytes))
+		err = WriteToConfig("TOKEN", "'"+string(tokenBytes)+"'")
 		if err != nil {
 			log.Fatalf("Error saving token: %v", err)
 		}
@@ -148,12 +148,16 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 // Retrieves a token from a local file.
 func tokenFromFile() (*oauth2.Token, error) {
-	tokenValue, err := ReadFromConfig("TOKEN")
+	config, err := ReadFromConfig()
 	if err != nil {
 		return nil, err
 	}
 
+	if config.Token == "" {
+		return nil, errors.New("TOKEN not found in config file")
+	}
+
 	tok := &oauth2.Token{}
-	err = json.Unmarshal([]byte(tokenValue), tok)
+	err = json.Unmarshal([]byte(config.Token), tok)
 	return tok, err
 }

@@ -59,13 +59,17 @@ func PrepareCalendar() (*calendar.Service, string) {
 
 func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 
-	username, err := ReadFromConfig("USERNAME")
+	config, err := ReadFromConfig()
 	if err != nil {
-		log.Fatalf("Error reading username: %v", err)
+		log.Fatalf("Error reading config: %v", err)
+	}
+
+	if config.Username == "" {
+		log.Fatalf("Username not set in config")
 	}
 
 	fmt.Println("Getting my schedule")
-	schedule, err := GetMySchedule(username)
+	schedule, err := GetMySchedule(config.Username)
 	if err != nil {
 		log.Fatal(err)
 	}
