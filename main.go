@@ -1,16 +1,52 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"google.golang.org/api/calendar/v3"
 	"log"
+	"os"
+	"strings"
+)
+
+import (
+	"flag"
 )
 
 func main() {
+	configPath := flag.Bool("config", false, "Flag to run the config, rather than sync command")
+	flag.Parse()
+
+	_, err := ReadFromConfig()
+
+	if *configPath == true || err == nil {
+
+		ReadWriteConfig("XMatters API Key", "API_KEY")
+		ReadWriteConfig("XMatters API Secret", "API_SECRET")
+		ReadWriteConfig("XMatters Username", "USERNAME")
+
+		if *configPath == true {
+			return
+		}
+	}
 
 	calendarSrv, calendarId := PrepareCalendar()
 
 	AddEventsToCalendar(calendarSrv, calendarId)
+}
+
+func ReadWriteConfig(label string, key string) {
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print(fmt.Sprintf("Enter your %s (leave blank to ignore): ", label))
+	value, _ := reader.ReadString('\n')
+	value = strings.TrimSpace(value)
+	if value != "" {
+		err := WriteToConfig(key, "\""+value+"\"")
+		if err != nil {
+			log.Fatalf("Error writing config: %v", err)
+		}
+	}
 }
 
 func PrepareCalendar() (*calendar.Service, string) {
@@ -65,7 +101,7 @@ func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 	}
 
 	if config.Username == "" {
-		log.Fatalf("Username not set in config. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
+		log.Fatalf("Username not set in config. Please run ./xmatters --config to configure")
 	}
 
 	fmt.Println("Getting my schedule")

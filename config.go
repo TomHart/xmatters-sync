@@ -24,7 +24,7 @@ func GetAPIKey() (string, error) {
 	}
 
 	if config.ApiKey == "" {
-		return "", errors.New("API_KEY not found in config file. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
+		return "", errors.New("API_KEY not found in config file. Please run ./xmatters --config to configure")
 	}
 
 	return config.ApiKey, nil
@@ -37,7 +37,7 @@ func GetAPISecret() (string, error) {
 	}
 
 	if config.ApiSecret == "" {
-		return "", errors.New("API_SECRET not found in config file. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
+		return "", errors.New("API_SECRET not found in config file. Please run ./xmatters --config to configure")
 	}
 
 	return config.ApiSecret, nil
@@ -64,6 +64,8 @@ func WriteToConfig(key string, value string) error {
 			return errors.Join(errors.New("error opening config file"), err)
 		}
 	}
+
+	value = strings.Replace(value, "\n", "", -1)
 
 	var lines []string
 	scanner := bufio.NewScanner(file)
