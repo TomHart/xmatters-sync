@@ -24,7 +24,7 @@ func GetAPIKey() (string, error) {
 	}
 
 	if config.ApiKey == "" {
-		return "", errors.New("API_KEY not found in config file")
+		return "", errors.New("API_KEY not found in config file. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
 	}
 
 	return config.ApiKey, nil
@@ -37,7 +37,7 @@ func GetAPISecret() (string, error) {
 	}
 
 	if config.ApiSecret == "" {
-		return "", errors.New("API_SECRET not found in config file")
+		return "", errors.New("API_SECRET not found in config file. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
 	}
 
 	return config.ApiSecret, nil

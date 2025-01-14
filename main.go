@@ -65,7 +65,7 @@ func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 	}
 
 	if config.Username == "" {
-		log.Fatalf("Username not set in config")
+		log.Fatalf("Username not set in config. Please ensure API_KEY, API_SECRET, and USERNAME are set in ~/.gdp/xmatters.conf")
 	}
 
 	fmt.Println("Getting my schedule")
