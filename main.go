@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 import (
@@ -17,17 +18,21 @@ func main() {
 	configPath := flag.Bool("config", false, "Flag to run the config, rather than sync command")
 	flag.Parse()
 
-	_, err := ReadFromConfig()
+	config, err := ReadFromConfig()
 
-	if *configPath == true || err != nil {
+	if config != nil && (*configPath == true || err == nil) {
 
-		if err != nil {
-			fmt.Println("No config file found, creating now")
+		if config.ApiKey == "" {
+			ReadWriteConfig("XMatters API Key", "API_KEY")
 		}
 
-		ReadWriteConfig("XMatters API Key", "API_KEY")
-		ReadWriteConfig("XMatters API Secret", "API_SECRET")
-		ReadWriteConfig("XMatters Username", "USERNAME")
+		if config.ApiSecret == "" {
+			ReadWriteConfig("XMatters API Secret", "API_SECRET")
+		}
+
+		if config.Username == "" {
+			ReadWriteConfig("XMatters Username", "USERNAME")
+		}
 
 		if *configPath == true {
 			return
@@ -78,7 +83,7 @@ func PrepareCalendar() (*calendar.Service, string) {
 		log.Fatalf("%v", err)
 	}
 
-	events, err := calendarSrv.Events.List(calendarId).Do()
+	events, err := calendarSrv.Events.List(calendarId).TimeMin(time.Now().Format(time.RFC3339)).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve next ten of the user's events: %v", err)
 	}
