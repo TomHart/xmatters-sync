@@ -19,7 +19,11 @@ func main() {
 
 	_, err := ReadFromConfig()
 
-	if *configPath == true || err == nil {
+	if *configPath == true || err != nil {
+
+		if err != nil {
+			fmt.Println("No config file found, creating now")
+		}
 
 		ReadWriteConfig("XMatters API Key", "API_KEY")
 		ReadWriteConfig("XMatters API Secret", "API_SECRET")
@@ -50,7 +54,7 @@ func ReadWriteConfig(label string, key string) {
 }
 
 func PrepareCalendar() (*calendar.Service, string) {
-	calendarName := "On Call 2"
+	calendarName := "On Call"
 
 	fmt.Printf("Looking for calendar '%s'\n", calendarName)
 	calendarId, err := GetCalendarId(calendarName)
