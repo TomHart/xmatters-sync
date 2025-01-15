@@ -4,154 +4,197 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/BurntSushi/toml"
+	"github.com/keybase/go-keychain"
+	"log"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-type Config struct {
-	ApiKey    string `toml:"API_KEY"`
-	ApiSecret string `toml:"API_SECRET"`
-	Username  string
-	Token     string
+func EnsureApiKeySet(forceConfigure bool) {
+	apiKey, err := GetApiKey()
+	if err != nil {
+		var valErr *NoValue
+		if !errors.As(err, &valErr) {
+			log.Fatalf("error getting api key: %v", valErr.Err)
+		}
+
+		ReadFromUser("XMatters API Key", "api_key")
+		return
+	}
+
+	if apiKey == "" || forceConfigure == true {
+		ReadFromUser("XMatters API Key", "api_key")
+	}
 }
 
-func GetAPIKey() (string, error) {
-	config, err := ReadFromConfig()
+func EnsureApiSecretSet(forceConfigure bool) {
+	apiKey, err := GetApiSecret()
 	if err != nil {
-		return "", err
+		var valErr *NoValue
+		if !errors.As(err, &valErr) {
+			log.Fatalf("error getting api secret: %v", valErr.Err)
+		}
+
+		ReadFromUser("XMatters API Secret", "api_secret")
+		return
 	}
 
-	if config.ApiKey == "" {
-		return "", errors.New("API_KEY not found in config file. Please run ./xmatters --config to configure")
+	if apiKey == "" || forceConfigure == true {
+		ReadFromUser("XMatters API Secret", "api_secret")
 	}
-
-	return config.ApiKey, nil
 }
 
-func GetAPISecret() (string, error) {
-	config, err := ReadFromConfig()
+func EnsureXMattersDomainSet(forceConfigure bool) {
+	apiKey, err := GetXMattersDomain()
 	if err != nil {
-		return "", err
+		var valErr *NoValue
+		if !errors.As(err, &valErr) {
+			log.Fatalf("error getting username: %v", valErr.Err)
+		}
+
+		ReadFromUser("XMatters Domain (abc.xmatters.sky for example)", "domain")
+		return
 	}
 
-	if config.ApiSecret == "" {
-		return "", errors.New("API_SECRET not found in config file. Please run ./xmatters --config to configure")
+	if apiKey == "" || forceConfigure == true {
+		ReadFromUser("XMatters Domain (abc.xmatters.sky for example)", "domain")
 	}
-
-	return config.ApiSecret, nil
 }
 
-func WriteToConfig(key string, value string) error {
-	homeDir, err := os.UserHomeDir()
+func EnsureUsernameSet(forceConfigure bool) {
+	apiKey, err := GetUsername()
 	if err != nil {
-		return fmt.Errorf("error getting home directory: %v", err)
-	}
-
-	configFilePath := homeDir + "/.gdp/xmatters.conf"
-	file, err := os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE, 0755)
-	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
-				return errors.Join(errors.New("error creating config directory"), err)
-			}
-			_, err = os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE, 0755)
-			if err != nil {
-				return errors.Join(errors.New("error creating config file"), err)
-			}
-		} else {
-			return errors.Join(errors.New("error opening config file"), err)
+		var valErr *NoValue
+		if !errors.As(err, &valErr) {
+			log.Fatalf("error getting username: %v", valErr.Err)
 		}
+
+		ReadFromUser("XMatters Username", "username")
+		return
 	}
 
-	value = strings.Replace(value, "\n", "", -1)
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, key+"=") {
-			lines = append(lines, key+"="+value)
-		} else {
-			lines = append(lines, line)
-		}
+	if apiKey == "" || forceConfigure == true {
+		ReadFromUser("XMatters Username", "username")
 	}
-
-	if err := scanner.Err(); err != nil {
-		return errors.Join(err, errors.New("error reading config file"))
-	}
-
-	if !strings.Contains(strings.Join(lines, "\n"), key+"="+value) {
-		lines = append(lines, key+"="+value)
-	}
-
-	file, err = os.OpenFile(configFilePath, os.O_WRONLY|os.O_TRUNC, 0755)
-	if err != nil {
-		return errors.Join(errors.New("error opening config file for writing"), err)
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error closing file: %v", err)
-		}
-	}(file)
-
-	writer := bufio.NewWriter(file)
-	for _, line := range lines {
-		_, err := writer.WriteString(line + "\n")
-		if err != nil {
-			return errors.Join(errors.New("error writing to config file"), err)
-		}
-	}
-
-	err = writer.Flush()
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
-func ReadFromConfig() (*Config, error) {
-	homeDir, err := os.UserHomeDir()
+type NoValue struct {
+	Err error
+}
+
+func (r *NoValue) Error() string {
+	return fmt.Sprintf("no api key set: err %v", r.Err)
+}
+
+func GetApiKey() (string, error) {
+	// Doesn't error if it's not set
+	key, err := keychain.GetGenericPassword("XMatters Sync", "api_key", "", "xmatters")
+	keyStr := string(key)
+
 	if err != nil {
-		return nil, fmt.Errorf("error getting home directory: %v", err)
+		return "", &NoValue{Err: err}
 	}
 
-	configFilePath := homeDir + "/.gdp/xmatters.conf"
-	file, err := os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE, 0755)
+	if keyStr == "" {
+		return "", &NoValue{}
+	}
+
+	return keyStr, nil
+}
+
+func GetApiSecret() (string, error) {
+	// Doesn't error if it's not set
+	secret, err := keychain.GetGenericPassword("XMatters Sync", "api_secret", "", "xmatters")
+	secretStr := string(secret)
+
 	if err != nil {
-		if os.IsNotExist(err) {
-			if err := os.MkdirAll(filepath.Dir(configFilePath), 0755); err != nil {
-				return nil, errors.Join(errors.New("error creating config directory"), err)
+		return "", &NoValue{Err: err}
+	}
+
+	if secretStr == "" {
+		return "", &NoValue{}
+	}
+
+	return secretStr, nil
+}
+
+func GetXMattersDomain() (string, error) {
+	// Doesn't error if it's not set
+	domain, err := keychain.GetGenericPassword("XMatters Sync", "domain", "", "xmatters")
+	domainStr := string(domain)
+
+	if err != nil {
+		return "", &NoValue{Err: err}
+	}
+
+	if domainStr == "" {
+		return "", &NoValue{}
+	}
+
+	return domainStr, nil
+}
+
+func GetUsername() (string, error) {
+	// Doesn't error if it's not set
+	username, err := keychain.GetGenericPassword("XMatters Sync", "username", "", "xmatters")
+	usernameStr := string(username)
+
+	if err != nil {
+		return "", &NoValue{Err: err}
+	}
+
+	if usernameStr == "" {
+		return "", &NoValue{}
+	}
+
+	return usernameStr, nil
+}
+
+func GetGoogleToken() (string, error) {
+	// Doesn't error if it's not set
+	username, err := keychain.GetGenericPassword("XMatters Sync", "google_token", "", "xmatters")
+	usernameStr := string(username)
+
+	if err != nil {
+		return "", &NoValue{Err: err}
+	}
+
+	if usernameStr == "" {
+		return "", &NoValue{}
+	}
+
+	return usernameStr, nil
+}
+
+func SetGoogleToken(token string) error {
+	_ = keychain.DeleteGenericPasswordItem("XMatters Sync", "google_token")
+
+	item := keychain.NewGenericPassword("XMatters Sync", "google_token", "", []byte(token), "xmatters")
+	item.SetSynchronizable(keychain.SynchronizableNo)
+	item.SetAccessible(keychain.AccessibleWhenUnlocked)
+	err := keychain.AddItem(item)
+
+	return err
+}
+
+func ReadFromUser(label string, key string) {
+	for {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print(fmt.Sprintf("Enter your %s: ", label))
+		value, _ := reader.ReadString('\n')
+		value = strings.TrimSpace(value)
+		if value != "" {
+			_ = keychain.DeleteGenericPasswordItem("XMatters Sync", key)
+
+			item := keychain.NewGenericPassword("XMatters Sync", key, "", []byte(value), "xmatters")
+			item.SetSynchronizable(keychain.SynchronizableNo)
+			item.SetAccessible(keychain.AccessibleWhenUnlocked)
+			err := keychain.AddItem(item)
+			if errors.Is(err, keychain.ErrorDuplicateItem) {
+				log.Fatalf("wasn't able to save the key: %v", err)
 			}
-			file, err = os.OpenFile(configFilePath, os.O_RDWR|os.O_CREATE, 0755)
-			if err != nil {
-				return nil, errors.Join(errors.New("error creating config file"), err)
-			}
-		} else {
-			return nil, errors.Join(errors.New("error opening config file"), err)
+
+			return
 		}
 	}
-
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("error closing file: %v", err)
-		}
-	}(file)
-
-	tomlData, err := os.ReadFile(configFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("error reading config file: %v", err)
-	}
-
-	var conf Config
-	_, err = toml.Decode(string(tomlData), &conf)
-	if err != nil {
-		return nil, fmt.Errorf("error decoding config file: %v", err)
-	}
-
-	return &conf, nil
 }
