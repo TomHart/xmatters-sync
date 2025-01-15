@@ -197,7 +197,7 @@ func GetMySchedule(username string) (*OnCallResult, error) {
 		return nil, err
 	}
 
-	findMyShift := func(shift OnCallData) bool {
+	findMyShift := func(shift *OnCallData) bool {
 
 		// If no data
 		if len(shift.Members.Data) == 0 {
@@ -222,7 +222,7 @@ func GetMySchedule(username string) (*OnCallResult, error) {
 
 		// If I'm replacing
 		if strings.ToUpper(shift.Members.Data[0].Replacements.Data[0].Replacement.TargetName) == strings.ToUpper(username) {
-			shift.Replacing = shift.Members.Data[0].Member.ExternalKey
+			shift.Replacing = fmt.Sprintf("%s %s", shift.Members.Data[0].Member.FirstName, shift.Members.Data[0].Member.LastName)
 			return true
 		}
 
@@ -235,9 +235,9 @@ func GetMySchedule(username string) (*OnCallResult, error) {
 	return &onCallData, nil
 }
 
-func filter[T any](ss []T, test func(T) bool) (ret []T) {
+func filter[T any](ss []T, test func(*T) bool) (ret []T) {
 	for _, s := range ss {
-		if test(s) {
+		if test(&s) {
 			ret = append(ret, s)
 		}
 	}
