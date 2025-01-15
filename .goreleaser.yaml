@@ -38,6 +38,13 @@ changelog:
       - "^docs:"
       - "^test:"
 
+brews:
+    - name: xmatters-sync
+
+      repository:
+        owner: TomHart
+        name: xmatters-sync
+
 release:
   footer: >-
 
