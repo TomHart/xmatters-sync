@@ -34,3 +34,6 @@ Thumbs.db
 *.swp
 *.swo
 *.swn
+
+# Added by goreleaser init:
+dist/

@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.10
 
 require (
-	github.com/BurntSushi/toml v1.4.0
+	github.com/keybase/go-keychain v0.0.0-20250107162724-3747e5bfbb71
 	golang.org/x/oauth2 v0.25.0
 	google.golang.org/api v0.216.0
 )
@@ -21,7 +21,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
-	github.com/keybase/go-keychain v0.0.0-20250107162724-3747e5bfbb71 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.54.0 // indirect
 	go.opentelemetry.io/otel v1.31.0 // indirect
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
