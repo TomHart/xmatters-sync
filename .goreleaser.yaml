@@ -45,6 +45,12 @@ brews:
         owner: TomHart
         name: xmatters-sync
 
+      description: |
+        A CLI script to sync a users schedule from xMatters to a Google Calendar SDK
+        Usage: `xmatters-sync`
+        To re-configure: `xmatters-sync --config`
+      homepage: https://github.com/TomHart/xmatters-sync
+
 release:
   footer: >-
 
