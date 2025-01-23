@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/api/calendar/v3"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -83,7 +84,13 @@ func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 	fmt.Printf("Total: %d\n", schedule.Total)
 
 	for _, shift := range schedule.Data {
-		name := fmt.Sprintf("On Call %s", ParseTime(shift.Start).Format("2 Jan 06"))
+		dayNumber, err := strconv.Atoi(ParseTime(shift.Start).Format("2"))
+		if err != nil {
+			log.Fatalf("Error converting day number: %v", err)
+		}
+
+		ordinal := GetOrdinal(dayNumber)
+		name := fmt.Sprintf("On Call - %s", ParseTime(shift.Start).Format(fmt.Sprintf("Monday 2%s Jan 2006", ordinal)))
 
 		if shift.Replacing != "" {
 			name = fmt.Sprintf("%s (replacing %s)", name, shift.Replacing)
@@ -108,5 +115,22 @@ func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 		}
 
 		fmt.Printf("Event created: %s\n", event.Summary)
+	}
+}
+
+func GetOrdinal(n int) string {
+	if n >= 11 && n <= 13 {
+		return "th"
+	}
+
+	switch n % 10 {
+	case 1:
+		return "st"
+	case 2:
+		return "nd"
+	case 3:
+		return "rd"
+	default:
+		return "th"
 	}
 }
