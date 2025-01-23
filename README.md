@@ -1,28 +1,23 @@
 # XMatters On Call Sync
 A Go application that syncs on-call schedules from xMatters to a Google Calendar. It is designed to be run as a cron job.
 
-## Building
-To build the application, run the following command:
-```bash
-go build
-```
-
-This will create an executable file named `xmatters`.
-
 ## Installation
-To install the application, run the following command:
-```bash
-go install
+See the `Install` section in the latest release
 
-# Add the following to your crontab
-0 * * * * xmatters
+## Usage
+First, message `@thomas.hart` on Slack your Google Calendar email address.
+
+<sub>I cannot publish the Google Application, so I need to add you as a Test User before you can grant access.</sub>
+
+Running the command, it will prompt you for your xMatters and Google Calendar credentials. It will then sync the on-call schedules from xMatters to the Google Calendar.
+```shell
+xmatters-sync
 ```
 
-## Releasing
-To release the application, run the following command (change the version number as needed):
-```bash
-VERSION=0.3.8
-git tag -a v$VERSION -m "Release v$VERSION"
-git push origin v$VERSION
-goreleaser release --clean
+## Cron
+To run the application as a cron job, add the following line to your crontab. This will run the application every 15 minutes.
+
+To pick a different interval, see [crontab.guru](https://crontab.guru/).
+```shell
+*/15 * * * * xmatters-sync
 ```

@@ -47,7 +47,7 @@ release:
     
     ```shell
     
-    sudo curl https://github.com/TomHart/xmatters-sync/releases/download/{{ .Tag }}/xmatters-sync_Darwin_arm64 -o /usr/local/bin/tomtest
+    sudo curl https://github.com/TomHart/xmatters-sync/releases/download/{{ .Tag }}/xmatters-sync_Darwin_arm64 -o /usr/local/bin/xmatters-sync
     
     ```
     
