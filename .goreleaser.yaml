@@ -43,10 +43,15 @@ release:
     ## Install
     
     ```shell
+    
     curl https://github.com/TomHart/xmatters-sync/releases/download/{{ .Tag }}/xmatters-sync_Darwin_arm64 -o xmatters-sync_Darwin_arm64 && \
+    
     curl -sSL https://github.com/TomHart/xmatters-sync/releases/download/{{ .Tag }}/xmatters-sync_{{ .Tag }}_checksums.txt | grep xmatters-sync_Darwin_arm64 | sha256sum -c - && \
+    
     sudo mv xmatters-sync_Darwin_arm64 /usr/local/bin/tomtest
+    
     ```
     
     ---
+    
     Released by [GoReleaser](https://github.com/goreleaser/goreleaser).

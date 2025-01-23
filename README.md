@@ -21,7 +21,7 @@ go install
 ## Releasing
 To release the application, run the following command (change the version number as needed):
 ```bash
-VERSION=0.3.3
+VERSION=0.3.6
 git tag -a v$VERSION -m "Release v$VERSION"
 git push origin v$VERSION
 goreleaser release --clean
