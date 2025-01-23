@@ -142,17 +142,22 @@ func CallAPI[V any](url string) (V, error) {
 
 	var result V
 
-	apiKey, err := GetAPIKey()
+	apiKey, err := GetApiKey()
 	if err != nil {
 		return result, errors.Join(errors.New("error getting API key"), err)
 	}
 
-	apiSecret, err := GetAPISecret()
+	apiSecret, err := GetApiSecret()
 	if err != nil {
 		return result, errors.Join(err, errors.New("error getting API secret"))
 	}
 
-	req, err := http.NewRequest("GET", "https://sky.xmatters.com"+url, nil)
+	domain, err := GetXMattersDomain()
+	if err != nil {
+		return result, errors.Join(err, errors.New("error getting xmatters domain"))
+	}
+
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://%s%s", domain, url), nil)
 	if err != nil {
 		return result, errors.Join(errors.New("error creating request"), err)
 	}
@@ -163,7 +168,13 @@ func CallAPI[V any](url string) (V, error) {
 		return result, errors.Join(errors.New("error making request"), err)
 	}
 
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println("Error closing response body")
+		}
+	}(response.Body)
+
 	if response.StatusCode != http.StatusOK {
 		return result, errors.New("received non-200 response code")
 	}

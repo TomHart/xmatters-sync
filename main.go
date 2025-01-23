@@ -1,61 +1,29 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"google.golang.org/api/calendar/v3"
 	"log"
-	"os"
-	"strings"
 	"time"
 )
 
-import (
-	"flag"
-)
-
 func main() {
-	configPath := flag.Bool("config", false, "Flag to run the config, rather than sync command")
-	flag.Parse()
-
-	config, err := ReadFromConfig()
-
-	if config != nil && (*configPath == true || err == nil) {
-
-		if config.ApiKey == "" {
-			ReadWriteConfig("XMatters API Key", "API_KEY")
-		}
-
-		if config.ApiSecret == "" {
-			ReadWriteConfig("XMatters API Secret", "API_SECRET")
-		}
-
-		if config.Username == "" {
-			ReadWriteConfig("XMatters Username", "USERNAME")
-		}
-
-		if *configPath == true {
-			return
-		}
-	}
+	SetupConfig()
 
 	calendarSrv, calendarId := PrepareCalendar()
 
 	AddEventsToCalendar(calendarSrv, calendarId)
 }
 
-func ReadWriteConfig(label string, key string) {
+func SetupConfig() {
+	forceConfigure := flag.Bool("config", false, "Flag to run the config, rather than sync command")
+	flag.Parse()
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(fmt.Sprintf("Enter your %s (leave blank to ignore): ", label))
-	value, _ := reader.ReadString('\n')
-	value = strings.TrimSpace(value)
-	if value != "" {
-		err := WriteToConfig(key, "\""+value+"\"")
-		if err != nil {
-			log.Fatalf("Error writing config: %v", err)
-		}
-	}
+	EnsureXMattersDomainSet(*forceConfigure)
+	EnsureApiKeySet(*forceConfigure)
+	EnsureApiSecretSet(*forceConfigure)
+	EnsureUsernameSet(*forceConfigure)
 }
 
 func PrepareCalendar() (*calendar.Service, string) {
@@ -104,17 +72,10 @@ func PrepareCalendar() (*calendar.Service, string) {
 
 func AddEventsToCalendar(calendarSrv *calendar.Service, calendarId string) {
 
-	config, err := ReadFromConfig()
-	if err != nil {
-		log.Fatalf("Error reading config: %v", err)
-	}
-
-	if config.Username == "" {
-		log.Fatalf("Username not set in config. Please run ./xmatters --config to configure")
-	}
+	username, _ := GetUsername()
 
 	fmt.Println("Getting my schedule")
-	schedule, err := GetMySchedule(config.Username)
+	schedule, err := GetMySchedule(username)
 	if err != nil {
 		log.Fatal(err)
 	}

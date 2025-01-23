@@ -17,3 +17,12 @@ go install
 # Add the following to your crontab
 0 * * * * xmatters
 ```
+
+## Releasing
+To release the application, run the following command (change the version number as needed):
+```bash
+VERSION=0.3.8
+git tag -a v$VERSION -m "Release v$VERSION"
+git push origin v$VERSION
+goreleaser release --clean
+```
